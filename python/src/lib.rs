@@ -37,6 +37,7 @@ use deltalake::operations::restore::RestoreBuilder;
 use deltalake::operations::transaction::{CommitBuilder, CommitProperties};
 use deltalake::operations::update::UpdateBuilder;
 use deltalake::operations::vacuum::VacuumBuilder;
+use deltalake::operations::write::WriteData;
 use deltalake::parquet::basic::Compression;
 use deltalake::parquet::errors::ParquetError;
 use deltalake::parquet::file::properties::WriterProperties;
@@ -1407,6 +1408,7 @@ fn write_to_deltalake(
     py: Python,
     table_uri: String,
     data: PyArrowType<ArrowArrayStreamReader>,
+    data_schema: PyArrowType<ArrowSchema>,
     mode: String,
     max_rows_per_group: i64,
     schema_mode: Option<String>,
@@ -1420,7 +1422,7 @@ fn write_to_deltalake(
     custom_metadata: Option<HashMap<String, String>>,
 ) -> PyResult<()> {
     py.allow_threads(|| {
-        let batches = data.0.map(|batch| batch.unwrap()).collect::<Vec<_>>();
+        let batches = data.0.map(|batch| batch.unwrap());
         let save_mode = mode.parse().map_err(PythonError::from)?;
 
         let options = storage_options.clone().unwrap_or_default();
@@ -1431,7 +1433,10 @@ fn write_to_deltalake(
             .map_err(PythonError::from)?;
 
         let mut builder = table
-            .write(batches)
+            .write(WriteData::RecordBatches((
+                Box::new(batches),
+                Arc::new(data_schema.0),
+            )))
             .with_save_mode(save_mode)
             .with_write_batch_size(max_rows_per_group as usize);
         if let Some(schema_mode) = schema_mode {

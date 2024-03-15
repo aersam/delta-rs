@@ -1523,6 +1523,7 @@ mod tests {
     use crate::kernel::StructField;
     use crate::operations::merge::generalize_filter;
     use crate::operations::merge::try_construct_early_filter;
+    use crate::operations::write::WriteData;
     use crate::operations::DeltaOps;
     use crate::protocol::*;
     use crate::writer::test_utils::datafusion::get_data;
@@ -1604,7 +1605,7 @@ mod tests {
         .unwrap();
         // write some data
         DeltaOps(table)
-            .write(vec![batch.clone()])
+            .write(batch.clone().into())
             .with_save_mode(SaveMode::Append)
             .await
             .unwrap()

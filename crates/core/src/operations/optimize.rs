@@ -1234,6 +1234,8 @@ pub(super) mod zorder {
 
         #[cfg(test)]
         mod tests {
+            use crate::operations::write::WriteData;
+
             use super::*;
             use ::datafusion::assert_batches_eq;
             use arrow_array::{Int32Array, StringArray};
@@ -1357,7 +1359,7 @@ pub(super) mod zorder {
                 .unwrap();
                 // write some data
                 let table = crate::DeltaOps::new_in_memory()
-                    .write(vec![batch.clone()])
+                    .write(batch.clone().into())
                     .with_save_mode(crate::protocol::SaveMode::Append)
                     .await
                     .unwrap();
