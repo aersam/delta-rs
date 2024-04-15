@@ -1553,6 +1553,7 @@ mod tests {
     use crate::kernel::StructField;
     use crate::operations::merge::generalize_filter;
     use crate::operations::merge::try_construct_early_filter;
+    use crate::operations::write::WriteData;
     use crate::operations::DeltaOps;
     use crate::protocol::*;
     use crate::writer::test_utils::datafusion::get_data;
@@ -1635,7 +1636,7 @@ mod tests {
         .unwrap();
         // write some data
         DeltaOps(table)
-            .write(vec![batch.clone()])
+            .write(batch.clone().into())
             .with_save_mode(SaveMode::Append)
             .await
             .unwrap()
@@ -2924,7 +2925,7 @@ mod tests {
         .unwrap();
 
         let table = DeltaOps(table)
-            .write(vec![batch.clone()])
+            .write(batch.into())
             .with_save_mode(SaveMode::Append)
             .await
             .unwrap();
@@ -3038,7 +3039,7 @@ mod tests {
         .unwrap();
 
         let table = DeltaOps(table)
-            .write(vec![batch1, batch2])
+            .write((vec![batch1, batch2]).into())
             .with_write_batch_size(2)
             .with_save_mode(SaveMode::Append)
             .await
@@ -3149,7 +3150,7 @@ mod tests {
         .unwrap();
 
         let table = DeltaOps(table)
-            .write(vec![batch.clone()])
+            .write(batch.into())
             .with_save_mode(SaveMode::Append)
             .await
             .unwrap();
